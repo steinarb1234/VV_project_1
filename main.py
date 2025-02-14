@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 
-def call_option_terminal(S_T, K):
+def terminal_value_call(S_T, K):
     return max(0, S_T - K)
 
-def put_option_terminal(S_T, K):
+def terminal_value_put(S_T, K):
     return max(0, K - S_T)
 
 def binomial_tree(S, K, r, T, sigma, N, terminal_payoff):
@@ -49,7 +49,7 @@ def binomial_tree(S, K, r, T, sigma, N, terminal_payoff):
         for j in range(i + 1):
             option_price[i, j] = np.exp(-r * dt) * (p * option_price[i + 1, j] + q * option_price[i + 1, j + 1])
 
-    return option_price[0, 0]
+    return option_price
 
 
 if __name__ == "__main__":
@@ -59,61 +59,68 @@ if __name__ == "__main__":
     r = 0.05  # Risk-free rate
     T = 1  # Time to maturity
     sigma = 0.2  # Volatility
-    N = 100  # Number of steps
-    terminal_payoff = call_option_terminal
+    N = 5  # Number of steps
+    terminal_payoff = terminal_value_call
     # terminal_payoff = put_option_terminal
 
     # Calculate the option price using the binomial tree model
-    option_price = binomial_tree(S, K, r, T, sigma, N, terminal_payoff)
+    tree = binomial_tree(S, K, r, T, sigma, N, terminal_payoff)
+    option_price = tree[0, 0]
     print(f"Option price: {option_price}")
 
     # Plot the option price as a function of the number of steps
-    N_values = np.arange(10, 1000, 10)
-    option_prices = [binomial_tree(S, K, r, T, sigma, N, terminal_payoff) for N in N_values]
+    # N_values = np.arange(10, 1000, 10)
+    # option_prices = [binomial_tree(S, K, r, T, sigma, N, terminal_payoff)[0, 0] for N in N_values]
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(N_values, option_prices, label="Option Price")
-    plt.xlabel("Number of Steps")
-    plt.ylabel("Option Price")
-    plt.title("Option Price as a Function of the Number of Steps")
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # Display the tree
+    df = pd.DataFrame(tree)
+    print(df)
 
-    # Calculate the Black-Scholes option price
-    d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
-    d2 = d1 - sigma * np.sqrt(T)
-    bs_call_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
-    print(f"Black-Scholes Call Option Price: {bs_call_price}")
 
-    # Calculate the error between the binomial tree model and the Black-Scholes model
-    errors = [abs(option_price - bs_call_price) for option_price in option_prices]
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(N_values, errors, label="Error")
-    plt.xlabel("Number of Steps")
-    plt.ylabel("Error")
-    plt.title("Error between Binomial Tree and Black-Scholes Models")
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # plt.figure(figsize=(10, 5))
+    # plt.plot(N_values, option_prices, label="Option Price")
+    # plt.xlabel("Number of Steps")
+    # plt.ylabel("Option Price")
+    # plt.title("Option Price as a Function of the Number of Steps")
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
 
-    # Calculate the convergence rate
-    log_errors = np.log(errors)
-    log_N_values = np.log(N_values)
-    slope, intercept = np.polyfit(log_N_values, log_errors, 1)
-    print(f"Convergence rate: {slope}")
+    # # Calculate the Black-Scholes option price
+    # d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+    # d2 = d1 - sigma * np.sqrt(T)
+    # bs_call_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    # print(f"Black-Scholes Call Option Price: {bs_call_price}")
 
-    # Plot the convergence rate
-    plt.figure(figsize=(10, 5))
-    plt.plot(log_N_values, log_errors, label="Log Error")
-    plt.plot(log_N_values, slope * log_N_values + intercept, label="Fitted Line")
-    plt.xlabel("Log Number of Steps")
-    plt.ylabel("Log Error")
-    plt.title("Convergence Rate of the Binomial Tree Model")
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # # Calculate the error between the binomial tree model and the Black-Scholes model
+    # errors = [abs(option_price - bs_call_price) for option_price in option_prices]
+
+    # plt.figure(figsize=(10, 5))
+    # plt.plot(N_values, errors, label="Error")
+    # plt.xlabel("Number of Steps")
+    # plt.ylabel("Error")
+    # plt.title("Error between Binomial Tree and Black-Scholes Models")
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+
+    # # Calculate the convergence rate
+    # log_errors = np.log(errors)
+    # log_N_values = np.log(N_values)
+    # slope, intercept = np.polyfit(log_N_values, log_errors, 1)
+    # print(f"Convergence rate: {slope}")
+
+    # # Plot the convergence rate
+    # plt.figure(figsize=(10, 5))
+    # plt.plot(log_N_values, log_errors, label="Log Error")
+    # plt.plot(log_N_values, slope * log_N_values + intercept, label="Fitted Line")
+    # plt.xlabel("Log Number of Steps")
+    # plt.ylabel("Log Error")
+    # plt.title("Convergence Rate of the Binomial Tree Model")
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
 
 
 
